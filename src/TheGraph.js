@@ -65,7 +65,8 @@ function TheGraph() {
   // any time something updates with your component, it will run useEffect
   // on first time of component mount or deps change
   useEffect(() => {
-    //getRandomCharacter();
+    setImages([]);
+    getRandomCharacter();
   }, []);
   return (
     <div>
@@ -94,16 +95,15 @@ function TheGraph() {
             )
       })}
       <CenterButton>
-        <Button colorScheme="white" variant="solid" onClick={getRandomCharacter}>Refresh</Button>
+        <Button colorScheme="white" variant="solid" onClick={getRandomCharacter}>Refresh Character</Button>
       </CenterButton>
       
     </div>
   )
 
   async function getRandomCharacter() {
-    const randomNumber = Math.round(Math.random() * 670 + 1);
     const query = `{
-      owners(first: 100, where:{id: "0xaba7161a7fb69c88e16ed9f455ce62b791ee4d03"}) {
+      owners(first: 10, where:{id: "0x5f8E477B694859Cd6B792cD1cec9Dea319be53a5"}) {
         tokens {
           tokenID
           tokenURI
@@ -114,24 +114,25 @@ function TheGraph() {
       query,
       // variables: TODO
     });
+    console.log(response);
     let arrayResponse = response.data.data.owners[0].tokens;
     let uris = [];
     arrayResponse.forEach((element, index) => {
       uris.push(element.tokenURI);
     });
 
-    const response2 = await axios.get(uris[0]);
-
     let tempImages = [];
 
-    uris.forEach(async(element) => {
-      let response = await axios.get(element);
-      console.log(response);
-      tempImages.push(response.data.image);
-    });
+    for(let i = 0; i < uris.length; i++) {
+      try {
+        let response = await axios.get(uris[i]);
+        tempImages.push(response.data.image);
+      } catch (err) {
+        console.log(err);
+      }
+      
+    }
     setImages(tempImages);
-    console.log(images);
-
     
   }
 }
